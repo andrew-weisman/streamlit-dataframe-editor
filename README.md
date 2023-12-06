@@ -5,5 +5,4 @@ Module (with complete example) to robustly handle editable dataframes in Streaml
 ## TODO
 
 * Post on Streamlit Community and link to [previous post](https://discuss.streamlit.io/t/simultaneous-multipage-widget-state-persistence-data-editors-with-identical-contents-and-multiprocessing-capability/52554)
-* Try not updating the key when copying values from previous page state to see if that helps with initial flashing
-* Test a bit more
+  * Add code from the post to this repository

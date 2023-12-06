@@ -4,7 +4,7 @@ import pandas as pd
 import random
 
 # Set the dataframe in the data editor to specific values robustly
-def update_dataframe_editor_contents(df_name, new_df_contents):
+def update_dataframe_editor_contents(df_name, new_df_contents, reset_key=True):
     '''
       Example calls (below):
         * update_dataframe_editor_contents('df2', default_df_contents2)  # either (1) initialization at the top of the script or (2) resetting of the data editor back to the original contents
@@ -12,7 +12,10 @@ def update_dataframe_editor_contents(df_name, new_df_contents):
     '''
     st.session_state[df_name] = new_df_contents
     st.session_state[df_name + '_changes_dict'] = {'edited_rows': {}, 'added_rows': [], 'deleted_rows': []}
-    st.session_state[df_name + '_key'] = df_name + '_' + get_random_integer() + '__do_not_persist'  # not strictly necessary to do every time, though it is in the case where the new data is exactly the same as the original data, so we may as well do it every time
+
+    # This step causes brief flashing of the dataframe so it's best to not run this unless required. A good time to not run this is when a dataframe is reloaded after leaving and coming back to the page it's on
+    if reset_key:
+        st.session_state[df_name + '_key'] = df_name + '_' + get_random_integer() + '__do_not_persist'  # not strictly necessary to do every time, though it is in the case where the new data is exactly the same as the original data, so we may as well do it every time
 
 # This function is necessary for retaining information in a data editor upon switching pages
 def reconstruct_edited_dataframe(df, changes_dict):
@@ -47,7 +50,7 @@ def handle_dataframe_editor(df_name, default_df_contents, current_page_id, previ
 
     # If we've just switched to this page, then have the input to the data editor be the previously saved "output" from the data editor. Note doing this like this should make the data editor experience smooth and hiccup-free, e.g., no scrollbar snapping back to the topmost location
     if current_page_id != st.session_state[previous_page_key]:
-        update_dataframe_editor_contents(df_name, reconstruct_edited_dataframe(st.session_state[df_name], st.session_state[df_name + '_changes_dict']))
+        update_dataframe_editor_contents(df_name, reconstruct_edited_dataframe(st.session_state[df_name], st.session_state[df_name + '_changes_dict']), reset_key=False)
 
     # Output a data editor for a dataframe of interest
     st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key']), num_rows='dynamic')

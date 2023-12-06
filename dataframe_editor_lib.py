@@ -1,6 +1,7 @@
 # Import relevant libraries
 import streamlit as st
 import pandas as pd
+import random
 
 # Set the dataframe in the data editor to specific values robustly
 def update_dataframe_editor_contents(df_name, new_df_contents):
@@ -39,7 +40,6 @@ def save_data_editor_changes(key_for_changes_dict, key_for_data_editor_widget):
 
 # Using this to create a new data editor key which is the only way to reset an editable dataframe to its original contents, per https://discuss.streamlit.io/t/reset-experimental-data-editor-to-original-values/41618. We likely haven't run into this before because in our editable dataframes we generally have new contents within the dataframe which forces this. But to reset to the exact same contents, you need a different key
 def get_random_integer(stop=1000000):
-    import random
     return '{:06d}'.format(random.randrange(start=0, stop=stop))
 
 # Function to perform all data editor functionalities for a dataframe that users should be able to manipulate

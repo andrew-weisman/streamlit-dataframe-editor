@@ -6,9 +6,13 @@ import random
 # Set the dataframe in the data editor to specific values robustly
 def update_dataframe_editor_contents(df_name, new_df_contents, reset_key=True):
     '''
-      Example calls (below):
+      Example instantiations of the editable dataframes:
+        * delib.handle_dataframe_editor('df2', default_df_contents2, curr_url)
+      Example updatings of the dataframes populating the data editors:
         * update_dataframe_editor_contents('df2', default_df_contents2)  # either (1) initialization at the top of the script or (2) resetting of the data editor back to the original contents
-        * update_dataframe_editor_contents('df2', reconstruct_edited_dataframe(st.session_state['df2'], st.session_state['df2_changes_dict']))  # updating of the contents to the saved values from the previous run of the page
+        * update_dataframe_editor_contents('df2', reconstruct_edited_dataframe(st.session_state['df2'], st.session_state['df2_changes_dict']), reset_key=False)  # updating of the contents to the saved values from the previous run of the page
+      Example reconstruction of the edited dataframe values:
+        * reconstruct_edited_dataframe(st.session_state['df2'], st.session_state['df2_changes_dict'])
     '''
     st.session_state[df_name] = new_df_contents
     st.session_state[df_name + '_changes_dict'] = {'edited_rows': {}, 'added_rows': [], 'deleted_rows': []}

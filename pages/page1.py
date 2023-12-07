@@ -11,7 +11,7 @@ def main():
 
     # Reload everything in the session state except for widgets that cannot be so saved, which we manually ignore by appending "__do_not_persist" to the widget's key
     for key, val in st.session_state.items():
-        if not key.endswith('__do_not_persist'):
+        if (not key.endswith('__do_not_persist')) and (not key.startswith('FormSubmitter:')):
             st.session_state[key] = val
 
     # Get the URL of the current page, per https://discuss.streamlit.io/t/what-is-the-current-page-in-use-multipage-app/41898, which we've used before but keeping the reference here anyway. Remember something strange happens here, with the script running twice or the like and not picking up the session state fully or vice versa, so sometimes we see strange behavior as a result though it's usually not a bit deal. In this case I've taken care of it anyway below by resetting the index on default_df_contents2

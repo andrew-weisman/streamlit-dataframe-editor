@@ -43,20 +43,16 @@ class DataframeEditor:
     def __init__(self, df_name, default_df_contents):
         self.df_name = df_name
         self.default_df_contents = default_df_contents
-        self.update_editor_contents(new_df_contents=default_df_contents)  # initialize the editor contents to its default dataframe
+        self.reset_dataframe_content()
+
+    # Initialize the editor contents to its default dataframe
+    def reset_dataframe_content(self):
+        self.update_editor_contents(new_df_contents=self.default_df_contents, reset_key=True)  # reset_key must = True here or else the resetting will not happen per nuances of Streamlit, due to the desired dataframe contents being the same as they once were with the same key I believe
 
     # Set the dataframe in the data editor to specific values robustly
     def update_editor_contents(self, new_df_contents, reset_key=True):
         '''
-          Example instantiations of the editable dataframes (replace the line where you're currently calling st.data_editor() with this):
-            * delib.handle_dataframe_editor('df2', default_df_contents2, curr_url)
-          Example updatings of the dataframes populating the data editors:
-            * update_editor_contents('df2', default_df_contents2)  # either (1) initialization at the top of the script or (2) resetting of the data editor back to the original contents
-            * update_editor_contents('df2', reconstruct_edited_dataframe(st.session_state['df2'], st.session_state['df2_changes_dict']), reset_key=False)  # updating of the contents to the saved values from the previous run of the page
-          Example reconstruction of the edited dataframe values:
-            * reconstruct_edited_dataframe(st.session_state['df2'], st.session_state['df2_changes_dict'])
-
-          Call like: de2.update_editor_contents(new_df_contents=pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]}), reset_key=False)
+          Call like: de2.update_editor_contents(new_df_contents=pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]}), reset_key=True)  # reset_key=True has some flicker but is necessary in case the data editor contents are ever the same, in which case they wouldn't update. So reset_key=False may lead to non-updates, but no flicker, and is the right option for e.g. leaving and coming back to the page containing the data editor as long as the contents were not expected to have changed in the interim, so there's no need to force a refresh using reset_key=True
         '''
 
         df_name = self.df_name
@@ -79,11 +75,13 @@ class DataframeEditor:
     # Function to perform all data editor functionalities for a dataframe that users should be able to manipulate
     def process_data_editor(self, current_page_id, previous_page_key='previous_url'):
         '''
-          Call like: de2.process_data_editor(current_page_id=curr_url, previous_page_key='previous_url')
+          Replace the likes of this (the full line, including any return variables):
+            st.data_editor(st.session_state['df2'], num_rows='dynamic')
+          with a call like this:
+            de2.process_data_editor(current_page_id=curr_url, previous_page_key='previous_url')
         '''
 
         df_name = self.df_name
-        default_df_contents = self.default_df_contents
 
         # If we've just switched to this page, then have the input to the data editor be the previously saved "output" from the data editor. Note doing this like this should make the data editor experience smooth and hiccup-free, e.g., no scrollbar snapping back to the topmost location
         if current_page_id != st.session_state[previous_page_key]:
@@ -93,4 +91,4 @@ class DataframeEditor:
         st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key']), num_rows='dynamic')
 
         # Create a button to reset the data in the data editor
-        st.button('Reset data editor', on_click=self.update_editor_contents, args=(default_df_contents,), key=(df_name + '_button__do_not_persist'))
+        st.button('Reset data editor', on_click=self.reset_dataframe_content, key=(df_name + '_button__do_not_persist'))

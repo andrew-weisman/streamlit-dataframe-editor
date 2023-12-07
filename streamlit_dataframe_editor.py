@@ -4,6 +4,7 @@
 import streamlit as st
 import random
 import pandas as pd
+from st_pages import get_pages, get_script_run_ctx
 
 # Using this to create a new data editor key which is the only way to reset an editable dataframe to its original contents, per https://discuss.streamlit.io/t/reset-experimental-data-editor-to-original-values/41618. We likely haven't run into this before because in our editable dataframes we generally have new contents within the dataframe which forces this. But to reset to the exact same contents, you need a different key
 def get_random_integer(stop=1000000):
@@ -33,6 +34,27 @@ def reconstruct_edited_dataframe(df, changes_dict):
 def save_data_editor_changes(key_for_changes_dict, key_for_data_editor_widget):
     st.session_state[key_for_changes_dict] = st.session_state[key_for_data_editor_widget]
 
+def get_current_page_name():
+    # This is a snippet from Zachary Blackwood using his st_pages package per https://discuss.streamlit.io/t/how-can-i-learn-what-page-i-am-looking-at/56980 for getting the page name without having the script run twice as it does using the st_javascript package with curr_url = st_javascript("await fetch('').then(r => window.parent.location.href)").
+    # Note that you can also import these from streamlit directly
+    pages = get_pages("")
+    ctx = get_script_run_ctx()
+    try:
+        current_page = pages[ctx.page_script_hash]
+    except KeyError:
+        current_page = [
+            p for p in pages.values() if p["relative_page_hash"] == ctx.page_script_hash
+        ][0]
+    return current_page['page_name']
+
+# Reload everything in the session state except for widgets that cannot be so saved, which we manually ignore by appending "__do_not_persist" to the widget's key
+# Credit Dante Smith for figuring out the (not key.startswith('FormSubmitter:')) part
+def load_session_state_from_previous_page(session_state):
+    for key, val in session_state.items():
+        if (not key.endswith('__do_not_persist')) and (not key.startswith('FormSubmitter:')):
+            session_state[key] = val
+    return session_state
+
 # Define the DataframeEditor class
 class DataframeEditor:
     '''
@@ -47,6 +69,9 @@ class DataframeEditor:
 
     # Initialize the editor contents to its default dataframe
     def reset_dataframe_content(self):
+        '''
+          Call like: de2.reset_dataframe_content()
+        '''
         self.update_editor_contents(new_df_contents=self.default_df_contents, reset_key=True)  # reset_key must = True here or else the resetting will not happen per nuances of Streamlit, due to the desired dataframe contents being the same as they once were with the same key I believe
 
     # Set the dataframe in the data editor to specific values robustly

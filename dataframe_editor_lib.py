@@ -1,3 +1,5 @@
+# This module should be supplanted by dataframe_editor.py, which is an object-oriented version. See note at top therein.
+
 # Import relevant libraries
 import streamlit as st
 import pandas as pd
@@ -6,7 +8,7 @@ import random
 # Set the dataframe in the data editor to specific values robustly
 def update_dataframe_editor_contents(df_name, new_df_contents, reset_key=True):
     '''
-      Example instantiations of the editable dataframes:
+      Example instantiations of the editable dataframes (replace the line where you're currently calling st.data_editor() with this):
         * delib.handle_dataframe_editor('df2', default_df_contents2, curr_url)
       Example updatings of the dataframes populating the data editors:
         * update_dataframe_editor_contents('df2', default_df_contents2)  # either (1) initialization at the top of the script or (2) resetting of the data editor back to the original contents

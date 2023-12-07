@@ -4,7 +4,7 @@
 import streamlit as st
 import pandas as pd
 from streamlit_javascript import st_javascript
-import dataframe_editor
+import streamlit_dataframe_editor
 
 # Main function
 def main():
@@ -23,9 +23,9 @@ def main():
 
     # Initialize some variables in the session state
     if 'de3' not in st.session_state:
-        st.session_state['de3'] = dataframe_editor.DataframeEditor(df_name='df3', default_df_contents=default_df_contents3)
+        st.session_state['de3'] = streamlit_dataframe_editor.DataframeEditor(df_name='df3', default_df_contents=default_df_contents3)
     if 'de4' not in st.session_state:
-        st.session_state['de4'] = dataframe_editor.DataframeEditor(df_name='df4', default_df_contents=default_df_contents4)
+        st.session_state['de4'] = streamlit_dataframe_editor.DataframeEditor(df_name='df4', default_df_contents=default_df_contents4)
     if 'previous_url' not in st.session_state:
         st.session_state['previous_url'] = curr_url
 

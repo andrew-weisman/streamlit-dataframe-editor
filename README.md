@@ -104,9 +104,3 @@ Don't forget to switch back and forth between the pages to see the saved edited 
 The only atypical dependency of this package is [st-pages](https://github.com/blackary/st_pages), which is needed to obtain the current page name.
 
 Alternatively, the package [streamlit-javascript](https://github.com/thunderbug1/streamlit-javascript) could be used to obtain the current page name, but this package seems to cause the Streamlit script to run twice, whereas `st-pages` does not.
-
-## TODO
-
-* Post on Streamlit Community and link to [previous post](https://discuss.streamlit.io/t/simultaneous-multipage-widget-state-persistence-data-editors-with-identical-contents-and-multiprocessing-capability/52554)
-* Add code from that post to this repository?
-* Turn into a package?

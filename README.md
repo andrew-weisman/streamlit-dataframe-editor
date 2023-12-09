@@ -23,7 +23,7 @@ and add this to the bottom:
 st.session_state = sde.finalize_session_state(st.session_state)
 ```
 
-Somewhere in between, instantiate the class for each desired editable dataframe using something like:
+**Only on a page where you would like to create an editable dataframe,** somewhere in between, instantiate the class for each desired editable dataframe using something like:
 
 ```python
 st.session_state['dataframe_editor'] = sde.DataframeEditor(df_name='my_dataframe', default_df_contents=pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]}))

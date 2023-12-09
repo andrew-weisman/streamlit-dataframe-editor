@@ -6,7 +6,7 @@ The [st.data_editor()](https://docs.streamlit.io/library/advanced-features/dataf
 1. Losing changes made to dataframes on multi-page apps after leaving and coming back to the page
 1. Unresponsive resetting of the contents of the dataframe back to the original contents
 
-This `streamlit-dataframe-editor` package allows you to perform all these tasks efficiently and easily. Overall, whatever issues we've encountered with `st.data_editor()` for dataframes, we've addressed them with appropriate workarounds by abstracting them into this tool.
+This `streamlit-dataframe-editor` package allows you to perform all these tasks efficiently and easily. Overall, whatever issues we've encountered with `st.data_editor()` for dataframes, we've addressed them with appropriate workarounds by abstracting them into a module.
 
 ## Setup
 

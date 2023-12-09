@@ -1,5 +1,3 @@
-# This should generally supplant dataframe_editor_lib.py with this equivalent object-oriented version. Probably only maintain this file (dataframe_editor.py) going forward, not dataframe_editor_lib.py.
-
 # Import relevant libraries
 import streamlit as st
 import random
@@ -55,34 +53,56 @@ def load_session_state_from_previous_page(session_state):
             session_state[key] = val
     return session_state
 
+# Define the previous page name if it hasn't already been initialized
+def initialize_previous_page_name(current_page_name, session_state):
+    if 'previous_page_name' not in session_state:
+        session_state['previous_page_name'] = current_page_name
+    return session_state
+
+# Run common things at the top of the page in a single function
+def initialize_session_state(session_state):
+    session_state = load_session_state_from_previous_page(session_state)  # load the st.session_state from the previous page
+    session_state['current_page_name'] = get_current_page_name()  # get the current page name, saving it to the session state
+    session_state = initialize_previous_page_name(session_state['current_page_name'], session_state)  # initialize the previous page name to the current page name if it's not already defined. This is unnecessary to do on pages not containing any dataframe editor objects, but for uniformity in "decorating" all pages, it shouldn't hurt to include this here and to call top_matter() on all pages
+    return session_state
+
+# Set the old page name to the current page name
+def finalize_session_state(session_state):
+    session_state['previous_page_name'] = session_state['current_page_name']
+    return session_state
+
+# Run a check on dataframe columns labels and convert them to strings if they're not already strings
+def cast_column_labels_to_strings(df):
+    cols = df.columns
+    non_str_cols = [col for col in cols if not isinstance(col, str)]
+    non_str_cols_string_versions = [str(col) for col in non_str_cols]
+    mapper = dict(zip(non_str_cols, non_str_cols_string_versions))
+    if len(non_str_cols) > 0:
+        st.warning('Columns with non-string labels have been detected, and Streamlit internally casts [columns names to strings](https://docs.streamlit.io/library/advanced-features/dataframes#limitations), a known limitation. This causes problems when data is edited in such columns, so we\'re now casting these column names to strings: {}.'.format(non_str_cols), icon='⚠️')
+    return df.rename(columns=mapper)
+
 # Define the DataframeEditor class
 class DataframeEditor:
-    '''
-      Call like: de2 = DataframeEditor(df_name='df2', default_df_contents=pd.DataFrame())
-    '''
 
     # Object instantiation
     def __init__(self, df_name, default_df_contents):
         self.df_name = df_name
-        self.default_df_contents = default_df_contents
+        self.default_df_contents = cast_column_labels_to_strings(default_df_contents)
         self.reset_dataframe_content()
 
     # Initialize the editor contents to its default dataframe
     def reset_dataframe_content(self):
-        '''
-          Call like: de2.reset_dataframe_content()
-        '''
-        self.update_editor_contents(new_df_contents=self.default_df_contents, reset_key=True)  # reset_key must = True here or else the resetting will not happen per nuances of Streamlit, due to the desired dataframe contents being the same as they once were with the same key I believe
+        self.update_editor_contents(new_df_contents=self.default_df_contents)  # reset_key must = True (the default) here or else the resetting will not happen per nuances of Streamlit, due to the desired dataframe contents being the same as they once were with the same key I believe
 
     # Set the dataframe in the data editor to specific values robustly
     def update_editor_contents(self, new_df_contents, reset_key=True):
         '''
-          Call like: de2.update_editor_contents(new_df_contents=pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]}), reset_key=True)  # reset_key=True has some flicker but is necessary in case the data editor contents are ever the same, in which case they wouldn't update. So reset_key=False may lead to non-updates, but no flicker, and is the right option for e.g. leaving and coming back to the page containing the data editor as long as the contents were not expected to have changed in the interim, so there's no need to force a refresh using reset_key=True
+          Note reset_key=True has some flicker but is necessary in case the data editor contents are ever the same, in which case they wouldn't update. So reset_key=False may lead to non-updates, but no flicker, and is the right option for e.g. leaving and coming back to the page containing the data editor as long as the contents were not expected to have changed in the interim, so there's no need to force a refresh using reset_key=True.
         '''
 
         df_name = self.df_name
 
-        st.session_state[df_name] = new_df_contents
+        st.session_state[df_name] = cast_column_labels_to_strings(new_df_contents)
         st.session_state[df_name + '_changes_dict'] = {'edited_rows': {}, 'added_rows': [], 'deleted_rows': []}
 
         # This step causes brief flashing of the dataframe so it's best to not run this unless required. A good time to not run this is when a dataframe is reloaded after leaving and coming back to the page it's on
@@ -91,29 +111,27 @@ class DataframeEditor:
 
     # Method version of same-named function
     def reconstruct_edited_dataframe(self):
-        '''
-          Call like: current_contents = de2.reconstruct_edited_dataframe()
-        '''
         df_name = self.df_name
         return reconstruct_edited_dataframe(st.session_state[df_name], st.session_state[df_name + '_changes_dict'])
 
     # Function to perform all data editor functionalities for a dataframe that users should be able to manipulate
-    def process_data_editor(self, current_page_id, previous_page_key='previous_url'):
-        '''
-          Replace the likes of this (the full line, including any return variables):
-            st.data_editor(st.session_state['df2'], num_rows='dynamic')
-          with a call like this:
-            de2.process_data_editor(current_page_id=curr_url, previous_page_key='previous_url')
-        '''
+    def dataframe_editor(self, current_page_key='current_page_name', previous_page_key='previous_page_name', dynamic_rows=True, reset_data_editor_button=True):
 
         df_name = self.df_name
+        current_page_name = st.session_state[current_page_key]
+        previous_page_name = st.session_state[previous_page_key]
 
         # If we've just switched to this page, then have the input to the data editor be the previously saved "output" from the data editor. Note doing this like this should make the data editor experience smooth and hiccup-free, e.g., no scrollbar snapping back to the topmost location
-        if current_page_id != st.session_state[previous_page_key]:
+        if current_page_name != previous_page_name:
             self.update_editor_contents(new_df_contents=self.reconstruct_edited_dataframe(), reset_key=False)
 
         # Output a data editor for a dataframe of interest
-        st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key']), num_rows='dynamic')
+        if dynamic_rows:
+            num_rows='dynamic'
+        else:
+            num_rows='fixed'
+        st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key']), num_rows=num_rows)
 
         # Create a button to reset the data in the data editor
-        st.button('Reset data editor', on_click=self.reset_dataframe_content, key=(df_name + '_button__do_not_persist'))
+        if reset_data_editor_button:
+            st.button('Reset data editor', on_click=self.reset_dataframe_content, key=(df_name + '_button__do_not_persist'))

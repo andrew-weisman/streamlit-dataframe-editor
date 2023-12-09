@@ -5,14 +5,14 @@ import streamlit_dataframe_editor as sde
 # Main function
 def main():
 
-    # Load the st.session_state from the previous page
-    st.session_state = sde.load_session_state_from_previous_page(st.session_state)
+    # Run streamlit-dataframe-editor library initialization tasks at the top of the page
+    st.session_state = sde.initialize_session_state(st.session_state)
 
     # Output something on the page
-    st.write('Hi from home page')
+    st.write('Hi from a page that does not contain a `DataframeEditor` object')
 
-    # If there are no data editors to be present on the page, save the page name like this before potentially leaving the page. This must be present on every page (per Zachary Blackwood at https://discuss.streamlit.io/t/how-can-i-learn-what-page-i-am-looking-at/56980)
-    st.session_state['previous_page_name'] = sde.get_current_page_name()
+    # Run streamlit-dataframe-editor library finalization tasks at the bottom of the page
+    st.session_state = sde.finalize_session_state(st.session_state)
 
 # Call the main function
 if __name__ == '__main__':

@@ -40,6 +40,9 @@ def main():
         st.header('Dataframe 4')
         st.session_state['de4'].dataframe_editor(reset_data_editor_button=False)
 
+    st.write('Contents of the first column of Dataframe 4:')
+    st.write(st.session_state['de4'].reconstruct_edited_dataframe().iloc[:, 0])
+
     # Demonstrate additional usage scenarios
     st.header('Additional examples')
 

@@ -29,8 +29,11 @@ def reconstruct_edited_dataframe(df, changes_dict):
     return df_edited
 
 # From the data editor key, which is a dictionary of changes to the input dataframe, save the changes dictionary to the session state
-def save_data_editor_changes(key_for_changes_dict, key_for_data_editor_widget):
+# This should probably be renamed as I've generalized it to include optional additional callbacks
+def save_data_editor_changes(key_for_changes_dict, key_for_data_editor_widget, additional_callback):
     st.session_state[key_for_changes_dict] = st.session_state[key_for_data_editor_widget]
+    if additional_callback is not None:
+        additional_callback()
 
 def get_current_page_name():
     # This is a snippet from Zachary Blackwood using his st_pages package per https://discuss.streamlit.io/t/how-can-i-learn-what-page-i-am-looking-at/56980 for getting the page name without having the script run twice as it does using the st_javascript package with curr_url = st_javascript("await fetch('').then(r => window.parent.location.href)").
@@ -115,7 +118,7 @@ class DataframeEditor:
         return reconstruct_edited_dataframe(st.session_state[df_name], st.session_state[df_name + '_changes_dict'])
 
     # Function to perform all data editor functionalities for a dataframe that users should be able to manipulate
-    def dataframe_editor(self, current_page_key='current_page_name', previous_page_key='previous_page_name', dynamic_rows=True, reset_data_editor_button=True):
+    def dataframe_editor(self, current_page_key='current_page_name', previous_page_key='previous_page_name', dynamic_rows=True, reset_data_editor_button=True, on_change=None):
 
         df_name = self.df_name
         current_page_name = st.session_state[current_page_key]
@@ -130,7 +133,7 @@ class DataframeEditor:
             num_rows='dynamic'
         else:
             num_rows='fixed'
-        st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key']), num_rows=num_rows)
+        st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key'], on_change), num_rows=num_rows)
 
         # Create a button to reset the data in the data editor
         if reset_data_editor_button:

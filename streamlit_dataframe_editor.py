@@ -118,7 +118,7 @@ class DataframeEditor:
         return reconstruct_edited_dataframe(st.session_state[df_name], st.session_state[df_name + '_changes_dict'])
 
     # Function to perform all data editor functionalities for a dataframe that users should be able to manipulate
-    def dataframe_editor(self, current_page_key='current_page_name', previous_page_key='previous_page_name', dynamic_rows=True, reset_data_editor_button=True, on_change=None):
+    def dataframe_editor(self, current_page_key='current_page_name', previous_page_key='previous_page_name', dynamic_rows=True, reset_data_editor_button=True, reset_data_editor_button_text='Reset data editor', on_change=None):
 
         df_name = self.df_name
         current_page_name = st.session_state[current_page_key]
@@ -137,4 +137,4 @@ class DataframeEditor:
 
         # Create a button to reset the data in the data editor
         if reset_data_editor_button:
-            st.button('Reset data editor', on_click=self.reset_dataframe_content, key=(df_name + '_button__do_not_persist'))
+            st.button(reset_data_editor_button_text, on_click=self.reset_dataframe_content, key=(df_name + '_button__do_not_persist'))

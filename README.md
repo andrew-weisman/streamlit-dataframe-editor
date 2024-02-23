@@ -63,6 +63,14 @@ st.session_state['dataframe_editor'].reset_dataframe_content()
 st.session_state['dataframe_editor'].update_editor_contents(new_df_contents=pd.DataFrame({'c': [11, 13], 'd': [14, 16]}))
 ```
 
+### Completely reset a dataframe editor object
+
+This essentially both updates what's in the dataframe editor (as above) *and* it's default contents, so e.g. when you hit the "Reset" button, the dataframe will be reset to a *new* dataframe:
+
+```python
+del st.session_state['dataframe_editor']
+```
+
 ## Example
 
 To see the package in action, clone this repository and run:

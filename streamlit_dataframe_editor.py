@@ -176,6 +176,7 @@ class DataframeEditor:
         else:
             num_rows='fixed'
         st.data_editor(st.session_state[df_name], key=st.session_state[df_name + '_key'], on_change=save_data_editor_changes, args=(df_name + '_changes_dict', st.session_state[df_name + '_key'], on_change), num_rows=num_rows, hide_index=hide_index, column_config=column_config)
+        # st.write(f'st.data_editor() key for the dataframe {df_name}: {st.session_state[df_name + "_key"]}')
 
         # Create a button to reset the data in the data editor
         if reset_data_editor_button:

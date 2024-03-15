@@ -23,6 +23,8 @@ and add this to the bottom:
 st.session_state = sde.finalize_session_state(st.session_state)
 ```
 
+This top- and bottom-matter should likely go in the `if __name__ == '__main__':` block so the user would be allowed to throw an error/warning in the `main()` function and `return` yet still run `st.session_state = sde.finalize_session_state(st.session_state)`.
+
 **Only on a page where you would like to create an editable dataframe,** somewhere in between, instantiate the class for each desired editable dataframe using something like:
 
 ```python

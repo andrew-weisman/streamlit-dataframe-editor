@@ -2,7 +2,7 @@
 import streamlit as st
 import random
 import pandas as pd
-from st_pages import get_pages, get_script_run_ctx
+# from st_pages import get_pages, get_script_run_ctx
 
 def get_random_integer(stop=1000000):
     '''

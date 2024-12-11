@@ -10,22 +10,27 @@ This `streamlit-dataframe-editor` package allows you to perform all these tasks 
 
 ## Setup
 
-At the top of every page in the app, regardless of whether an editable dataframe will be included, add:
+In the [new multipage structure](https://docs.streamlit.io/develop/concepts/multipage-apps/page-and-navigation) in Streamlit, a function called from the `if __name__ == '__main__':` (e.g. `main()`) should contain something like:
 
 ```python
-import streamlit_dataframe_editor as sde
-st.session_state = sde.initialize_session_state(st.session_state)
+# For widget persistence between pages, we need always copy the session state to itself, being careful with widgets that cannot be persisted, like st.data_editor() (where we use the "__do_not_persist" suffix to avoid persisting it)
+for key in st.session_state.keys():
+    if (not key.endswith('__do_not_persist')) and (not key.startswith('FormSubmitter:')):
+        st.session_state[key] = st.session_state[key]
+
+# This is needed for the st.dataframe_editor() class (https://github.com/andrew-weisman/streamlit-dataframe-editor) but is also useful for seeing where we are and where we've been
+st.session_state['current_page_name'] = pg.url_path if pg.url_path != '' else 'Home'
+if 'previous_page_name' not in st.session_state:
+    st.session_state['previous_page_name'] = st.session_state['current_page_name']
+
+# Render the select page
+pg.run()
+
+# Update the previous page location
+st.session_state['previous_page_name'] = st.session_state['current_page_name']
 ```
 
-and add this to the bottom:
-
-```python
-st.session_state = sde.finalize_session_state(st.session_state)
-```
-
-This top- and bottom-matter should likely go in the `if __name__ == '__main__':` block so the user would be allowed to throw an error/warning in the `main()` function and `return` yet still run `st.session_state = sde.finalize_session_state(st.session_state)`.
-
-**Only on a page where you would like to create an editable dataframe,** somewhere in between, instantiate the class for each desired editable dataframe using something like:
+On a page where you would like to create an editable dataframe, instantiate the class for each desired editable dataframe using something like:
 
 ```python
 st.session_state['dataframe_editor'] = sde.DataframeEditor(df_name='my_dataframe', default_df_contents=pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]}))
@@ -72,17 +77,3 @@ This essentially both updates what's in the dataframe editor (as above) *and* it
 ```python
 del st.session_state['dataframe_editor']
 ```
-
-## Example
-
-To see the package in action, clone this repository and run:
-
-```bash
-streamlit run home.py
-```
-
-Don't forget to switch back and forth between the pages to see the saved edited dataframe contents.
-
-## Dependencies
-
-The only atypical dependency of this package is [st-pages](https://github.com/blackary/st_pages), which is used only to obtain the current page name.

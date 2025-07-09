@@ -14,7 +14,7 @@ In the [new multipage structure](https://docs.streamlit.io/develop/concepts/mult
 
 ```python
 # For widget persistence between pages, we need always copy the session state to itself, being careful with widgets that cannot be persisted, like st.data_editor() (where we use the "__do_not_persist" suffix to avoid persisting it).
-for key in st.session_state.keys():
+for key in st.session_state:
     if (not key.endswith('__do_not_persist')) and (not key.startswith('FormSubmitter:')):
         st.session_state[key] = st.session_state[key]
 
